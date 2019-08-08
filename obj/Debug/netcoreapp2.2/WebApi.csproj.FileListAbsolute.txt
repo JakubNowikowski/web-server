@@ -1,0 +1,14 @@
+C:\Users\kuban\source\repos\WebApi\bin\Debug\netcoreapp2.2\WebApi.deps.json
+C:\Users\kuban\source\repos\WebApi\bin\Debug\netcoreapp2.2\WebApi.runtimeconfig.json
+C:\Users\kuban\source\repos\WebApi\bin\Debug\netcoreapp2.2\WebApi.runtimeconfig.dev.json
+C:\Users\kuban\source\repos\WebApi\bin\Debug\netcoreapp2.2\WebApi.dll
+C:\Users\kuban\source\repos\WebApi\bin\Debug\netcoreapp2.2\WebApi.pdb
+C:\Users\kuban\source\repos\WebApi\obj\Debug\netcoreapp2.2\WebApi.csprojAssemblyReference.cache
+C:\Users\kuban\source\repos\WebApi\obj\Debug\netcoreapp2.2\WebApi.csproj.CoreCompileInputs.cache
+C:\Users\kuban\source\repos\WebApi\obj\Debug\netcoreapp2.2\WebApi.RazorAssemblyInfo.cache
+C:\Users\kuban\source\repos\WebApi\obj\Debug\netcoreapp2.2\WebApi.RazorAssemblyInfo.cs
+C:\Users\kuban\source\repos\WebApi\obj\Debug\netcoreapp2.2\WebApi.AssemblyInfoInputs.cache
+C:\Users\kuban\source\repos\WebApi\obj\Debug\netcoreapp2.2\WebApi.AssemblyInfo.cs
+C:\Users\kuban\source\repos\WebApi\obj\Debug\netcoreapp2.2\WebApi.RazorTargetAssemblyInfo.cache
+C:\Users\kuban\source\repos\WebApi\obj\Debug\netcoreapp2.2\WebApi.dll
+C:\Users\kuban\source\repos\WebApi\obj\Debug\netcoreapp2.2\WebApi.pdb
