@@ -37,19 +37,19 @@ namespace WebApi.Controllers
             }
         }
 
-        //// GET: api/Login
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<LoginItem>>> GetLoginItems()
-        //{
-        //    return await _context.LoginItems.ToListAsync();
-        //}
-
         // GET: api/Login
-        [HttpGet,Authorize]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<LoginItem>>> GetLoginItems()
         {
             return await _context.LoginItems.ToListAsync();
         }
+
+        //// GET: api/Login
+        //[HttpGet,Authorize]
+        //public async Task<ActionResult<IEnumerable<LoginItem>>> GetLoginItems()
+        //{
+        //    return await _context.LoginItems.ToListAsync();
+        //}
 
         // GET: api/Login/5
         [HttpGet("{id}")]

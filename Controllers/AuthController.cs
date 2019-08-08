@@ -16,16 +16,39 @@ namespace WebApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        // GET api/values
-        [HttpPost, Route("login")]
-        public IActionResult Login([FromBody]LoginModel user)
+        private readonly LoginContext _context;
+
+        public AuthController(LoginContext context)
         {
+            _context = context;
+            _context.SaveChanges();
+
+            if (_context.LoginItems.Count() == 0)
+            {
+                // Create a new LoginItem if collection is empty,
+                // which means you can't delete all LoginItems.
+                _context.LoginItems.Add(new LoginItem
+                {
+                    firstName = "Kaszub",
+                    lastName = "Morski",
+                    userName = "Kaszub",
+                    password = "Kaszub"
+                });
+                _context.SaveChanges();
+            }
+        }
+
+        [HttpPost, Route("login")]
+        public IActionResult Login([FromBody]LoginItem user)
+        {
+            var loginItem = _context.LoginItems.SingleOrDefault(s => s.userName == user.userName);
+
             if (user == null)
             {
                 return BadRequest("Invalid client request");
             }
 
-            if (user.UserName == "johndoe" && user.Password == "def@123")
+            if (loginItem !=null && loginItem.password == user.password)
             {
                 var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345"));
                 var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
@@ -46,5 +69,6 @@ namespace WebApi.Controllers
                 return Unauthorized();
             }
         }
+
     }
 }
