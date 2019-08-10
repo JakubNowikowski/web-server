@@ -48,7 +48,7 @@ namespace WebApi.Controllers
                 return BadRequest("Invalid client request");
             }
 
-            if (loginItem !=null && loginItem.password == user.password)
+            if (loginItem != null && loginItem.password == user.password)
             {
                 var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345"));
                 var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
@@ -62,11 +62,19 @@ namespace WebApi.Controllers
                 );
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
-                return Ok(new { Token = tokenString });
+                return Ok
+                (new
+                {
+                    Token = tokenString,
+                    id = loginItem.Id,
+                    username = loginItem.userName,
+                    firstName = loginItem.firstName,
+                    lastName = loginItem.lastName
+                });
             }
             else
             {
-                return Unauthorized();
+                return BadRequest("Username or password is incorrect");
             }
         }
 
