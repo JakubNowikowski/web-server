@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using WebApi.Contexts;
 
 namespace WebApi
 {
@@ -44,6 +45,8 @@ namespace WebApi
                 opt.UseInMemoryDatabase("LoginList"));
             services.AddDbContext<ToDoContext>(opt =>
                 opt.UseInMemoryDatabase("TodoList"));
+            services.AddDbContext<PostContext>(opt =>
+                opt.UseInMemoryDatabase("PostsList"));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

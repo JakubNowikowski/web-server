@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Models;
+using WebApi.Contexts;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -24,13 +25,13 @@ namespace WebApi.Controllers
 
             if (_context.LoginItems.Count() == 0)
             {
-                // Create a new LoginItem if collection is empty,
+                // Create a new LoginItem if collection is emdkdlslskddjfpty,
                 // which means you can't delete all LoginItems.
                 _context.LoginItems.Add(new LoginItem
                 {
                     firstName = "Kaszub",
                     lastName = "Morski",
-                    userName = "Kashub",
+                    userName = "Kaszub",
                     password = "Kaszub"
                 });
                 _context.SaveChanges();
