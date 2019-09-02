@@ -64,13 +64,33 @@ namespace WebApi.Controllers
             _context.PostsItems.Add(item);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetPostItem), new { id = item.Id }, item);
+            //return CreatedAtAction(nameof(GetPostItem), new { id = item.Id }, item);
+            return Ok
+               (new
+               {
+                   id = item.Id,
+                   username= item.userName,
+                   content= item.content
+               });
         }
 
         // PUT api/<controller>/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody]string value)
         {
+        }
+
+        // DELETE: api/Posts/5
+        [HttpDelete]
+        public async Task<IActionResult> DeleteAllPosts()
+        {
+            _context.PostsItems.RemoveRange(_context.PostsItems);
+
+            //.MyEntities.RemoveRange(dbContext.MyEntities);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         // DELETE api/<controller>/5
