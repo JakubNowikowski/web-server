@@ -40,7 +40,7 @@ namespace WebApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PostItem>>> GetPostItems()
         {
-            return await _context.PostsItems.ToListAsync();
+            return await _context.PostsItems.OrderByDescending(p=>p.Id).ToListAsync();
         }
 
         // GET: api/Posts/5
