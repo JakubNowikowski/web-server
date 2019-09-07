@@ -29,8 +29,8 @@ namespace WebApi.Controllers
                 // which means you can't delete all LoginItems.
                 _context.PostsItems.Add(new PostItem
                 {
-                    userName="Kaszub",
-                    content="Hello world"
+                    userName = "Kaszub",
+                    content = "Hello world"
                 });
                 _context.SaveChanges();
             }
@@ -38,9 +38,12 @@ namespace WebApi.Controllers
 
         // GET: api/Posts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PostItem>>> GetPostItems()
+        public async Task<ActionResult<IEnumerable<PostItem>>> GetPostItems(string userName)
         {
-            return await _context.PostsItems.OrderByDescending(p=>p.Id).ToListAsync();
+            return await _context.PostsItems
+                .Where(p => p.userName == userName)
+                .OrderByDescending(p => p.Id)
+                .ToListAsync();
         }
 
         // GET: api/Posts/5
@@ -69,8 +72,8 @@ namespace WebApi.Controllers
                (new
                {
                    id = item.Id,
-                   username= item.userName,
-                   content= item.content
+                   username = item.userName,
+                   content = item.content
                });
         }
 

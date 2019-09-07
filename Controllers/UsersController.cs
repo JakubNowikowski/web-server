@@ -14,11 +14,11 @@ namespace WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LoginController : Controller
+    public class UsersController : Controller
     {
-        private readonly LoginContext _context;
+        private readonly UserContext _context;
 
-        public LoginController(LoginContext context)
+        public UsersController(UserContext context)
         {
             _context = context;
             _context.SaveChanges();
@@ -27,12 +27,19 @@ namespace WebApi.Controllers
             {
                 // Create a new LoginItem if collection is emdkdlslskddjfpty,
                 // which means you can't delete all LoginItems.
-                _context.LoginItems.Add(new LoginItem
+                _context.LoginItems.Add(new UserItem
                 {
                     firstName = "Kaszub",
                     lastName = "Morski",
                     userName = "Kaszub",
                     password = "Kaszub"
+                });
+                _context.LoginItems.Add(new UserItem
+                {
+                    firstName = "Bakusz",
+                    lastName = "xdddd",
+                    userName = "Bakusz",
+                    password = "Bakusz"
                 });
                 _context.SaveChanges();
             }
@@ -40,7 +47,7 @@ namespace WebApi.Controllers
 
         // GET: api/Login
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<LoginItem>>> GetLoginItems()
+        public async Task<ActionResult<IEnumerable<UserItem>>> GetLoginItems()
         {
             return await _context.LoginItems.ToListAsync();
         }
@@ -54,7 +61,7 @@ namespace WebApi.Controllers
 
         // GET: api/Login/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<LoginItem>> GetLoginItem(long id)
+        public async Task<ActionResult<UserItem>> GetLoginItem(long id)
         {
             var loginItem = await _context.LoginItems.FindAsync(id);
 
@@ -68,7 +75,7 @@ namespace WebApi.Controllers
 
         // POST: api/Login
         [HttpPost]
-        public async Task<ActionResult<LoginItem>> PostLoginItem(LoginItem item)
+        public async Task<ActionResult<UserItem>> PostLoginItem(UserItem item)
         {
             _context.LoginItems.Add(item);
             await _context.SaveChangesAsync();
@@ -78,7 +85,7 @@ namespace WebApi.Controllers
 
         // PUT: api/Login/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutLoginItem(long id, LoginItem item)
+        public async Task<IActionResult> PutLoginItem(long id, UserItem item)
         {
             if (id != item.Id)
             {

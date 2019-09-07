@@ -18,9 +18,9 @@ namespace WebApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly LoginContext _context;
+        private readonly UserContext _context;
 
-        public AuthController(LoginContext context)
+        public AuthController(UserContext context)
         {
             _context = context;
             _context.SaveChanges();
@@ -29,7 +29,7 @@ namespace WebApi.Controllers
             {
                 // Create a new LoginItem if collection is empty,
                 // which means you can't delete all LoginItems.
-                _context.LoginItems.Add(new LoginItem
+                _context.LoginItems.Add(new UserItem
                 {
                     firstName = "Kaszub",
                     lastName = "Morski",
@@ -41,7 +41,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost, Route("login")]
-        public IActionResult Login([FromBody]LoginItem user)
+        public IActionResult Login([FromBody]UserItem user)
         {
             var loginItem = _context.LoginItems.SingleOrDefault(s => s.userName == user.userName);
 

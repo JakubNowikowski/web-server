@@ -41,12 +41,14 @@ namespace WebApi
                                  .AllowAnyMethod();
                       });
             });
-            services.AddDbContext<LoginContext>(opt =>
+            services.AddDbContext<UserContext>(opt =>
                 opt.UseInMemoryDatabase("LoginList"));
             services.AddDbContext<ToDoContext>(opt =>
                 opt.UseInMemoryDatabase("TodoList"));
             services.AddDbContext<PostContext>(opt =>
                 opt.UseInMemoryDatabase("PostsList"));
+            services.AddDbContext<FollowContext>(opt =>
+                 opt.UseInMemoryDatabase("FollowList"));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

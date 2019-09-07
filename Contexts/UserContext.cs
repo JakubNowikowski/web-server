@@ -7,13 +7,13 @@ using WebApi.Models;
 
 namespace WebApi
 {
-    public class LoginContext : DbContext
+    public class UserContext : DbContext
     {
-        public LoginContext(DbContextOptions<LoginContext> options)
+        public UserContext(DbContextOptions<UserContext> options)
             : base(options)
         {
         }
 
-        public DbSet<LoginItem> LoginItems { get; set; }
+        public DbSet<UserItem> LoginItems { get; set; }
     }
 }
