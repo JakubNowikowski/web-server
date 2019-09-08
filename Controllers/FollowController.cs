@@ -36,6 +36,13 @@ namespace WebApi.Controllers
 
         }
 
+        // GET: api/Login
+        [HttpGet("allItems")]
+        public async Task<ActionResult<IEnumerable<FollowItem>>> GetAllItems()
+        {
+            return await _context.FollowItems.ToListAsync();
+        }
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowings(string userName)
         {
@@ -45,12 +52,6 @@ namespace WebApi.Controllers
                 .ToListAsync();
         }
 
-        // GET api/<controller>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
 
         //// POST api/<controller>
         //[HttpPost]

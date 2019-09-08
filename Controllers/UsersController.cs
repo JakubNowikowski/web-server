@@ -27,6 +27,9 @@ namespace WebApi.Controllers
             {
                 // Create a new LoginItem if collection is emdkdlslskddjfpty,
                 // which means you can't delete all LoginItems.
+
+                #region Creating fake useres
+
                 _context.LoginItems.Add(new UserItem
                 {
                     firstName = "Kaszub",
@@ -41,6 +44,30 @@ namespace WebApi.Controllers
                     userName = "Bakusz",
                     password = "Bakusz"
                 });
+                _context.LoginItems.Add(new UserItem
+                {
+                    firstName = "a",
+                    lastName = "a",
+                    userName = "a",
+                    password = "aaaaaa"
+                });
+                _context.LoginItems.Add(new UserItem
+                {
+                    firstName = "b",
+                    lastName = "b",
+                    userName = "b",
+                    password = "bbbbbb"
+                });
+                _context.LoginItems.Add(new UserItem
+                {
+                    firstName = "c",
+                    lastName = "c",
+                    userName = "c",
+                    password = "cccccc"
+                });
+
+                #endregion
+
                 _context.SaveChanges();
             }
         }
