@@ -31,6 +31,11 @@ namespace WebApi.Controllers
                     follower = "Kaszub",
                     following = "Bakusz"
                 });
+                _context.FollowItems.Add(new FollowItem
+                {
+                    follower = "Bakusz",
+                    following = "Kaszub"
+                });
                 _context.SaveChanges();
             }
 
@@ -43,7 +48,16 @@ namespace WebApi.Controllers
             return await _context.FollowItems.ToListAsync();
         }
 
-        [HttpGet]
+        [HttpGet("followers")]
+        public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowers(string userName)
+        {
+            //TODO
+            return await _context.FollowItems
+                .Where(f => f.following == userName)
+                .ToListAsync();
+        }
+
+        [HttpGet("followings")]
         public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowings(string userName)
         {
             //TODO
