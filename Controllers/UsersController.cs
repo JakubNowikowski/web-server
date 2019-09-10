@@ -32,38 +32,31 @@ namespace WebApi.Controllers
 
                 _context.LoginItems.Add(new UserItem
                 {
-                    firstName = "Kaszub",
-                    lastName = "Morski",
-                    userName = "Kaszub",
-                    password = "Kaszub"
-                });
-                _context.LoginItems.Add(new UserItem
-                {
-                    firstName = "Bakusz",
-                    lastName = "xdddd",
-                    userName = "Bakusz",
-                    password = "Bakusz"
-                });
-                _context.LoginItems.Add(new UserItem
-                {
-                    firstName = "a",
-                    lastName = "a",
-                    userName = "a",
+                    firstName = "user1",
+                    lastName = "user1",
+                    userName = "user1",
                     password = "aaaaaa"
                 });
                 _context.LoginItems.Add(new UserItem
                 {
-                    firstName = "b",
-                    lastName = "b",
-                    userName = "b",
-                    password = "bbbbbb"
+                    firstName = "user2",
+                    lastName = "user2",
+                    userName = "user2",
+                    password = "aaaaaa"
                 });
                 _context.LoginItems.Add(new UserItem
                 {
-                    firstName = "c",
-                    lastName = "c",
-                    userName = "c",
-                    password = "cccccc"
+                    firstName = "user3",
+                    lastName = "user3",
+                    userName = "user3",
+                    password = "aaaaaa"
+                });
+                _context.LoginItems.Add(new UserItem
+                {
+                    firstName = "user4",
+                    lastName = "user4",
+                    userName = "user4",
+                    password = "aaaaaa"
                 });
 
                 #endregion

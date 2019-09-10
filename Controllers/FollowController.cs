@@ -28,13 +28,23 @@ namespace WebApi.Controllers
                 // which means you can't delete all LoginItems.
                 _context.FollowItems.Add(new FollowItem
                 {
-                    follower = "Kaszub",
-                    following = "Bakusz"
+                    follower = "user1",
+                    following = "user2"
                 });
                 _context.FollowItems.Add(new FollowItem
                 {
-                    follower = "Bakusz",
-                    following = "Kaszub"
+                    follower = "user2",
+                    following = "user1"
+                });
+                _context.FollowItems.Add(new FollowItem
+                {
+                    follower = "user1",
+                    following = "user3"
+                });
+                _context.FollowItems.Add(new FollowItem
+                {
+                    follower = "user1",
+                    following = "user4"
                 });
                 _context.SaveChanges();
             }
@@ -51,7 +61,6 @@ namespace WebApi.Controllers
         [HttpGet("followers")]
         public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowers(string userName)
         {
-            //TODO
             return await _context.FollowItems
                 .Where(f => f.following == userName)
                 .ToListAsync();
@@ -60,18 +69,10 @@ namespace WebApi.Controllers
         [HttpGet("followings")]
         public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowings(string userName)
         {
-            //TODO
             return await _context.FollowItems
                 .Where(f => f.follower == userName)
                 .ToListAsync();
         }
-
-
-        //// POST api/<controller>
-        //[HttpPost]
-        //public void Post([FromBody]string value)
-        //{
-        //}
 
         // POST: api/Login
         [HttpPost]
@@ -91,9 +92,35 @@ namespace WebApi.Controllers
         }
 
         // DELETE api/<controller>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete]
+        public async Task<IActionResult> Unfollow(string follower, string following)
         {
+            //var loginItem = await _context.LoginItems.FindAsync(id);
+
+            //if (loginItem == null)
+            //{
+            //    return NotFound();
+            //}
+
+            //_context.LoginItems.Remove(loginItem);
+            //await _context.SaveChangesAsync();
+
+
+            //var followItem = await _context.FollowItems.FindAsync(follower, following);
+
+            var followItem = await _context.FollowItems.Where(f => f.follower == follower && f.following == following).FirstOrDefaultAsync();
+
+
+            if (followItem == null)
+            {
+                return NotFound();
+            }
+
+            _context.FollowItems.Remove(followItem);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

@@ -29,8 +29,23 @@ namespace WebApi.Controllers
                 // which means you can't delete all LoginItems.
                 _context.PostsItems.Add(new PostItem
                 {
-                    userName = "Kaszub",
-                    content = "Hello world"
+                    userName = "user1",
+                    content = "post: user1"
+                });
+                _context.PostsItems.Add(new PostItem
+                {
+                    userName = "user2",
+                    content = "post: user2"
+                });
+                _context.PostsItems.Add(new PostItem
+                {
+                    userName = "user3",
+                    content = "post: user3"
+                });
+                _context.PostsItems.Add(new PostItem
+                {
+                    userName = "user4",
+                    content = "post: user4"
                 });
                 _context.SaveChanges();
             }
@@ -38,12 +53,19 @@ namespace WebApi.Controllers
 
         // GET: api/Posts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PostItem>>> GetPostItems(string userName)
+        public async Task<ActionResult<IEnumerable<PostItem>>> GetPostsByFollowingUsers(string followingUsers)
         {
-            return await _context.PostsItems
-                .Where(p => p.userName == userName)
-                .OrderByDescending(p => p.Id)
-                .ToListAsync();
+            var userList = followingUsers.Split(',').ToList();
+            var postList = new List<PostItem>();
+
+            foreach (var e in userList)
+            {
+                postList.AddRange(await _context.PostsItems
+                .Where(p => p.userName == e)
+                .OrderByDescending(p => p.Id).ToListAsync());
+            }
+
+            return postList;
         }
 
         // GET: api/Posts/5

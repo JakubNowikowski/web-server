@@ -25,19 +25,19 @@ namespace WebApi.Controllers
             _context = context;
             _context.SaveChanges();
 
-            if (_context.LoginItems.Count() == 0)
-            {
-                // Create a new LoginItem if collection is empty,
-                // which means you can't delete all LoginItems.
-                _context.LoginItems.Add(new UserItem
-                {
-                    firstName = "Kaszub",
-                    lastName = "Morski",
-                    userName = "Kaszub",
-                    password = "Kaszub"
-                });
-                _context.SaveChanges();
-            }
+            //if (_context.LoginItems.Count() == 0)
+            //{
+            //    // Create a new LoginItem if collection is empty,
+            //    // which means you can't delete all LoginItems.
+            //    _context.LoginItems.Add(new UserItem
+            //    {
+            //        firstName = "Kaszub",
+            //        lastName = "Morski",
+            //        userName = "Kaszub",
+            //        password = "Kaszub"
+            //    });
+            //    _context.SaveChanges();
+            //}
         }
 
         [HttpPost, Route("login")]
