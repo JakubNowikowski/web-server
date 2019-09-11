@@ -16,63 +16,69 @@ namespace WebApi.Controllers
     [ApiController]
     public class PostsController : Controller
     {
-        private readonly PostContext _context;
+        private readonly PostContext _postContext;
+        private readonly FollowContext _followContext;
 
-        public PostsController(PostContext context)
+        public PostsController(PostContext postContext, FollowContext followContext)
         {
-            _context = context;
-            _context.SaveChanges();
+            _postContext = postContext;
+            _followContext = followContext;
 
-            if (_context.PostsItems.Count() == 0)
+            if (_postContext.PostsItems.Count() == 0)
             {
-                // Create a new LoginItem if collection is emdkdlslskddjfpty,
-                // which means you can't delete all LoginItems.
-                _context.PostsItems.Add(new PostItem
+                _postContext.PostsItems.Add(new PostItem
                 {
                     userName = "user1",
                     content = "post: user1"
                 });
-                _context.PostsItems.Add(new PostItem
+                _postContext.PostsItems.Add(new PostItem
                 {
                     userName = "user2",
                     content = "post: user2"
                 });
-                _context.PostsItems.Add(new PostItem
+                _postContext.PostsItems.Add(new PostItem
                 {
                     userName = "user3",
                     content = "post: user3"
                 });
-                _context.PostsItems.Add(new PostItem
+                _postContext.PostsItems.Add(new PostItem
                 {
                     userName = "user4",
                     content = "post: user4"
                 });
-                _context.SaveChanges();
+                _postContext.SaveChanges();
             }
         }
 
         // GET: api/Posts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PostItem>>> GetPostsByFollowingUsers(string followingUsers)
+        public async Task<ActionResult<IEnumerable<PostItem>>> GetPostsByFollowingUsers(string currentUser)
         {
-            var userList = followingUsers.Split(',').ToList();
             var postList = new List<PostItem>();
+            var followingList = await GetFollowingsAsync(currentUser);
 
-            foreach (var e in userList)
+            foreach (var user in followingList)
             {
-                postList.AddRange(await _context.PostsItems
-                .Where(p => p.userName == e)
+                postList.AddRange(await _postContext.PostsItems
+                .Where(p => p.userName == user.following)
                 .OrderByDescending(p => p.Id).ToListAsync());
             }
 
             return postList;
         }
 
+        private async Task<List<FollowItem>> GetFollowingsAsync(string currentUser)
+        {
+            return await _followContext.FollowItems
+                .Where(f => f.follower == currentUser)
+                .ToListAsync();
+        }
+
         // GET: api/Posts/5
         [HttpGet("{id}")]
         public async Task<ActionResult<PostItem>> GetPostItem(long id)
         {
-            var postItem = await _context.PostsItems.FindAsync(id);
+            var postItem = await _postContext.PostsItems.FindAsync(id);
 
             if (postItem == null)
             {
@@ -86,10 +92,9 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<ActionResult<PostItem>> PostPostItem(PostItem item)
         {
-            _context.PostsItems.Add(item);
-            await _context.SaveChangesAsync();
+            _postContext.PostsItems.Add(item);
+            await _postContext.SaveChangesAsync();
 
-            //return CreatedAtAction(nameof(GetPostItem), new { id = item.Id }, item);
             return Ok
                (new
                {
@@ -109,11 +114,9 @@ namespace WebApi.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteAllPosts()
         {
-            _context.PostsItems.RemoveRange(_context.PostsItems);
+            _postContext.PostsItems.RemoveRange(_postContext.PostsItems);
 
-            //.MyEntities.RemoveRange(dbContext.MyEntities);
-
-            await _context.SaveChangesAsync();
+            await _postContext.SaveChangesAsync();
 
             return NoContent();
         }
