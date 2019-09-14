@@ -23,27 +23,12 @@ namespace WebApi.Controllers
         public AuthController(UserContext context)
         {
             _context = context;
-            _context.SaveChanges();
-
-            //if (_context.LoginItems.Count() == 0)
-            //{
-            //    // Create a new LoginItem if collection is empty,
-            //    // which means you can't delete all LoginItems.
-            //    _context.LoginItems.Add(new UserItem
-            //    {
-            //        firstName = "Kaszub",
-            //        lastName = "Morski",
-            //        userName = "Kaszub",
-            //        password = "Kaszub"
-            //    });
-            //    _context.SaveChanges();
-            //}
         }
 
         [HttpPost, Route("login")]
-        public IActionResult Login([FromBody]UserItem user)
+        public IActionResult Login([FromBody]User user)
         {
-            var loginItem = _context.LoginItems.SingleOrDefault(s => s.userName == user.userName);
+            var loginItem = _context.Users.SingleOrDefault(s => s.userName == user.userName);
 
             if (user == null)
             {

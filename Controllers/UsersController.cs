@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Models;
 using WebApi.Contexts;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,35 +24,35 @@ namespace WebApi.Controllers
             _context = context;
             _context.SaveChanges();
 
-            if (_context.LoginItems.Count() == 0)
+            if (_context.Users.Count() == 0)
             {
-                // Create a new LoginItem if collection is emdkdlslskddjfpty,
-                // which means you can't delete all LoginItems.
+                // Create a new UsersItem if collection is emdkdlslskddjfpty,
+                // which means you can't delete all UsersItems.
 
                 #region Creating fake useres
 
-                _context.LoginItems.Add(new UserItem
+                _context.Users.Add(new User
                 {
                     firstName = "user1",
                     lastName = "user1",
                     userName = "user1",
                     password = "aaaaaa"
                 });
-                _context.LoginItems.Add(new UserItem
+                _context.Users.Add(new User
                 {
                     firstName = "user2",
                     lastName = "user2",
                     userName = "user2",
                     password = "aaaaaa"
                 });
-                _context.LoginItems.Add(new UserItem
+                _context.Users.Add(new User
                 {
                     firstName = "user3",
                     lastName = "user3",
                     userName = "user3",
                     password = "aaaaaa"
                 });
-                _context.LoginItems.Add(new UserItem
+                _context.Users.Add(new User
                 {
                     firstName = "user4",
                     lastName = "user4",
@@ -65,47 +66,58 @@ namespace WebApi.Controllers
             }
         }
 
-        // GET: api/Login
+        // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserItem>>> GetLoginItems()
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return await _context.LoginItems.ToListAsync();
+            return await _context.Users.ToListAsync();
         }
 
-        //// GET: api/Login
-        //[HttpGet,Authorize]
-        //public async Task<ActionResult<IEnumerable<LoginItem>>> GetLoginItems()
-        //{
-        //    return await _context.LoginItems.ToListAsync();
-        //}
-
-        // GET: api/Login/5
+        // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserItem>> GetLoginItem(long id)
+        public async Task<ActionResult<User>> GetUser([FromRoute] int id)
         {
-            var loginItem = await _context.LoginItems.FindAsync(id);
-
-            if (loginItem == null)
+            try
             {
-                return NotFound();
+                var user = await GetUserById(id);
+                return Ok(user);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound("User with specified ID was not found");
             }
 
-            return loginItem;
         }
 
-        // POST: api/Login
-        [HttpPost]
-        public async Task<ActionResult<UserItem>> PostLoginItem(UserItem item)
+        private async Task<User> GetUserById(int id)
         {
-            _context.LoginItems.Add(item);
+            return await _context
+              .Users
+              .SingleAsync(u => u.Id == id);
+        }
+
+        // POST: api/Users
+        //[HttpPost]
+        //public async Task<ActionResult<UserItem>> PostUser(UserItem item)
+        //{
+        //    _context.Users.Add(item);
+        //    await _context.SaveChangesAsync();
+
+        //    return CreatedAtAction(nameof(GetUser), new { id = item.Id }, item);
+        //}
+
+        [HttpPost]
+        public async Task<ActionResult<User>> PostUser([BindRequired] [FromBody] User user)
+        {
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetLoginItem), new { id = item.Id }, item);
+            return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
 
-        // PUT: api/Login/5
+        // PUT: api/Users/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutLoginItem(long id, UserItem item)
+        public async Task<IActionResult> PutLoginItem(long id, User item)
         {
             if (id != item.Id)
             {
@@ -118,18 +130,18 @@ namespace WebApi.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Login/5
+        // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLoginItem(long id)
         {
-            var loginItem = await _context.LoginItems.FindAsync(id);
+            var loginItem = await _context.Users.FindAsync(id);
 
             if (loginItem == null)
             {
                 return NotFound();
             }
 
-            _context.LoginItems.Remove(loginItem);
+            _context.Users.Remove(loginItem);
             await _context.SaveChangesAsync();
 
             return NoContent();

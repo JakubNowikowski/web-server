@@ -14,6 +14,6 @@ namespace WebApi
         {
         }
 
-        public DbSet<UserItem> LoginItems { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }
