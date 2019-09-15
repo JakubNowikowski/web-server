@@ -17,42 +17,43 @@ namespace WebApi.Controllers
     [ApiController]
     public class UsersController : Controller
     {
-        private readonly UserContext _context;
+        private readonly UserContext _userContext;
+        private readonly PostContext _postContext;
 
-        public UsersController(UserContext context)
+        public UsersController(UserContext userContext, PostContext postContext)
         {
-            _context = context;
-            _context.SaveChanges();
+            _userContext = userContext;
+            _postContext = postContext;
 
-            if (_context.Users.Count() == 0)
+            if (_userContext.Users.Count() == 0)
             {
                 // Create a new UsersItem if collection is emdkdlslskddjfpty,
                 // which means you can't delete all UsersItems.
 
                 #region Creating fake useres
 
-                _context.Users.Add(new User
+                _userContext.Users.Add(new User
                 {
                     firstName = "user1",
                     lastName = "user1",
                     userName = "user1",
                     password = "aaaaaa"
                 });
-                _context.Users.Add(new User
+                _userContext.Users.Add(new User
                 {
                     firstName = "user2",
                     lastName = "user2",
                     userName = "user2",
                     password = "aaaaaa"
                 });
-                _context.Users.Add(new User
+                _userContext.Users.Add(new User
                 {
                     firstName = "user3",
                     lastName = "user3",
                     userName = "user3",
                     password = "aaaaaa"
                 });
-                _context.Users.Add(new User
+                _userContext.Users.Add(new User
                 {
                     firstName = "user4",
                     lastName = "user4",
@@ -62,20 +63,51 @@ namespace WebApi.Controllers
 
                 #endregion
 
-                _context.SaveChanges();
+                #region Creating random posts
+
+                if (_postContext.PostsItems.Count() == 0)
+                {
+                    _postContext.PostsItems.Add(new PostItem
+                    {
+                        userId = 1,
+                        content = "post: user1"
+                    });
+                    _postContext.PostsItems.Add(new PostItem
+                    {
+                        userId = 2,
+                        content = "post: user2"
+                    });
+                    _postContext.PostsItems.Add(new PostItem
+                    {
+                        userId = 3,
+                        content = "post: user3"
+                    });
+                    _postContext.PostsItems.Add(new PostItem
+                    {
+                        userId = 4,
+                        content = "post: user4"
+                    });
+                    _postContext.SaveChanges();
+                }
+
+                #endregion
+
+                _userContext.SaveChanges();
             }
         }
+
+        #region Users
 
         // GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            return await _userContext.Users.ToListAsync();
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser([FromRoute] int id)
+        public async Task<IActionResult> GetUser([FromRoute] int id)
         {
             try
             {
@@ -91,7 +123,7 @@ namespace WebApi.Controllers
 
         private async Task<User> GetUserById(int id)
         {
-            return await _context
+            return await _userContext
               .Users
               .SingleAsync(u => u.Id == id);
         }
@@ -107,10 +139,10 @@ namespace WebApi.Controllers
         //}
 
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser([BindRequired] [FromBody] User user)
+        public async Task<IActionResult> PostUser([BindRequired] [FromBody] User user)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            _userContext.Users.Add(user);
+            await _userContext.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
@@ -124,8 +156,8 @@ namespace WebApi.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(item).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _userContext.Entry(item).State = EntityState.Modified;
+            await _userContext.SaveChangesAsync();
 
             return NoContent();
         }
@@ -134,17 +166,126 @@ namespace WebApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLoginItem(long id)
         {
-            var loginItem = await _context.Users.FindAsync(id);
+            var loginItem = await _userContext.Users.FindAsync(id);
 
             if (loginItem == null)
             {
                 return NotFound();
             }
 
-            _context.Users.Remove(loginItem);
-            await _context.SaveChangesAsync();
+            _userContext.Users.Remove(loginItem);
+            await _userContext.SaveChangesAsync();
 
             return NoContent();
         }
+
+        #endregion
+
+        #region Posts
+
+        // GET: api/Posts
+        [HttpGet("{id}/posts/{postId}")]
+        public async Task<IActionResult> GetPost([FromRoute] int id, [FromRoute] int postId)
+        {
+            User user;
+            try
+            {
+                user = await GetUserById(id);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound("Specified user could not be found");
+            }
+
+            PostItem post;
+            try
+            {
+                post = await _postContext.PostsItems.SingleAsync(p => p.userId == id && p.Id == postId);
+            }
+            catch (Exception e) when (e is InvalidOperationException || e is ArgumentNullException)
+            {
+                return NotFound("Specified post could not be found");
+            }
+
+            return Ok();
+        }
+
+        // POST: api/Posts
+        [HttpPost("{id}/posts")]
+        public async Task<IActionResult> PostPostItem([FromRoute] int id, [BindRequired] [FromBody] PostItem post)
+        {
+            User user;
+            try
+            {
+                user = await GetUserById(id);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound("Specified user could not be found");
+            }
+
+            post.userId = id;
+            _postContext.PostsItems.Add(post);
+            await _postContext.SaveChangesAsync();
+
+            return Ok
+               (new
+               {
+                   username = post.userId,
+                   content = post.content
+               });
+            //return CreatedAtAction("GetPost", new { id = post.Id }, post);
+        }
+
+
+        [HttpGet("{id}/posts")]
+        public async Task<ActionResult<IEnumerable<PostItem>>> GetPosts([FromRoute] int id)
+        {
+            var postList = await _postContext.PostsItems.Where(p => p.userId == id).ToListAsync();
+            return postList;
+        }
+
+        //[HttpGet("{id}/posts")]
+        //public async Task<IActionResult> GetFollowingsPosts([FromRoute] int id)
+        //{
+        //    var postList = new List<PostItem>();
+        //    var followingList = await GetFollowingsAsync(id);
+
+        //    foreach (var user in followingList)
+        //    {
+        //        postList.AddRange(await _postContext.PostsItems
+        //        //.Where(p => p.userId == user.following)
+        //        .OrderByDescending(p => p.Id).ToListAsync());
+        //    }
+
+        //    return postList;
+        //}
+
+        //private async Task<List<FollowItem>> GetFollowingsAsync(int currentUserId)
+        //{
+        //    return await _followContext.FollowItems
+        //        .Where(f => f.follower == currentUserId)
+        //        .ToListAsync();
+        //}
+
+        //[HttpGet("{id}/posts")]
+        //public async Task<IActionResult> GetPosts([FromRoute] int id)
+        //{
+        //    User user;
+        //    try
+        //    {
+        //        user = await GetUserById(id);
+        //    }
+        //    catch (InvalidOperationException)
+        //    {
+        //        return NotFound("Specified user could not be found");
+        //    }
+
+        //    var posts= _postContext;
+
+        //    return Ok(periods);
+        //}
+
+        #endregion
     }
 }

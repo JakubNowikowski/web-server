@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Contexts;
 using WebApi.Models;
@@ -24,30 +25,34 @@ namespace WebApi.Controllers
             _postContext = postContext;
             _followContext = followContext;
 
-            if (_postContext.PostsItems.Count() == 0)
-            {
-                _postContext.PostsItems.Add(new PostItem
-                {
-                    userName = "user1",
-                    content = "post: user1"
-                });
-                _postContext.PostsItems.Add(new PostItem
-                {
-                    userName = "user2",
-                    content = "post: user2"
-                });
-                _postContext.PostsItems.Add(new PostItem
-                {
-                    userName = "user3",
-                    content = "post: user3"
-                });
-                _postContext.PostsItems.Add(new PostItem
-                {
-                    userName = "user4",
-                    content = "post: user4"
-                });
-                _postContext.SaveChanges();
-            }
+            #region Random posts
+
+            //if (_postContext.PostsItems.Count() == 0)
+            //{
+            //    _postContext.PostsItems.Add(new PostItem
+            //    {
+            //        userName = "user1",
+            //        content = "post: user1"
+            //    });
+            //    _postContext.PostsItems.Add(new PostItem
+            //    {
+            //        userName = "user2",
+            //        content = "post: user2"
+            //    });
+            //    _postContext.PostsItems.Add(new PostItem
+            //    {
+            //        userName = "user3",
+            //        content = "post: user3"
+            //    });
+            //    _postContext.PostsItems.Add(new PostItem
+            //    {
+            //        userName = "user4",
+            //        content = "post: user4"
+            //    });
+            //    _postContext.SaveChanges();
+            //}
+
+            #endregion
         }
 
         // GET: api/Posts
@@ -60,7 +65,7 @@ namespace WebApi.Controllers
             foreach (var user in followingList)
             {
                 postList.AddRange(await _postContext.PostsItems
-                .Where(p => p.userName == user.following)
+                //.Where(p => p.userId == user.following)
                 .OrderByDescending(p => p.Id).ToListAsync());
             }
 
@@ -89,18 +94,18 @@ namespace WebApi.Controllers
         }
 
         // POST: api/Posts
-        [HttpPost]
-        public async Task<ActionResult<PostItem>> PostPostItem(PostItem item)
+        [HttpPost("{id}")]
+        public async Task<ActionResult<PostItem>> PostPostItem(PostItem post)
         {
-            _postContext.PostsItems.Add(item);
+            _postContext.PostsItems.Add(post);
             await _postContext.SaveChangesAsync();
 
             return Ok
                (new
                {
-                   id = item.Id,
-                   username = item.userName,
-                   content = item.content
+                   id = post.Id,
+                   userId = post.userId,
+                   content = post.content
                });
         }
 
