@@ -301,6 +301,8 @@ namespace WebApi.Controllers
 
         #endregion
 
+        #region Follows
+
         // GET: api/1/following
         [HttpGet("{id}/following")]
         public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowings([FromRoute] int id)
@@ -314,5 +316,35 @@ namespace WebApi.Controllers
         {
             return await _followContext.FollowItems.Where(f => f.followingId == id).ToListAsync();
         }
+
+        // POST: api/users/1/follwing/5
+        [HttpPost("{id}/following/{followingId}")]
+        public async Task<ActionResult<FollowItem>> Follow([FromRoute] int id, [FromRoute] int followingId)
+        {
+            _followContext.FollowItems.Add(new FollowItem() { followerId = id, followingId = followingId });
+            await _followContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        // DELETE: api/users/1/follwing/5
+        [HttpDelete("{id}/following/{followingId}")]
+        public async Task<ActionResult<FollowItem>> Unfollow([FromRoute] int id, [FromRoute] int followingId)
+        {
+            var followItem = await _followContext.FollowItems.Where(f => f.followerId == id && f.followingId == followingId).FirstOrDefaultAsync();
+
+            if (followItem == null)
+            {
+                return NotFound();
+            }
+
+            _followContext.FollowItems.Remove(followItem);
+
+            await _followContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        #endregion
     }
 }
