@@ -219,6 +219,25 @@ namespace WebApi.Controllers
         #region Posts
 
         // GET: api/Posts
+        [HttpGet("{id}/posts")]
+        public async Task<ActionResult<IEnumerable<PostItem>>> GetPosts([FromRoute] int id)
+        {
+            var postList = new List<PostItem>();
+            var followingList = await GetFollowingsAsync(id);
+
+            postList = await _postContext.PostsItems.Where(p => p.userId == id).ToListAsync();
+
+            foreach (var follow in followingList)
+            {
+                postList.AddRange(await _postContext.PostsItems
+                .Where(p => p.userId == follow.followingId)
+                .ToListAsync());
+            }
+
+            return postList.OrderByDescending(p => p.Id).ToList();
+        }
+
+        // GET: api/Posts
         [HttpGet("{id}/posts/{postId}")]
         public async Task<IActionResult> GetPost([FromRoute] int id, [FromRoute] int postId)
         {
@@ -242,26 +261,7 @@ namespace WebApi.Controllers
                 return NotFound("Specified post could not be found");
             }
 
-            return Ok();
-        }
-
-        // GET: api/Posts
-        [HttpGet("{id}/posts")]
-        public async Task<ActionResult<IEnumerable<PostItem>>> GetPosts([FromRoute] int id)
-        {
-            var postList = new List<PostItem>();
-            var followingList = await GetFollowingsAsync(id);
-
-            postList = await _postContext.PostsItems.Where(p => p.userId == id).ToListAsync();
-
-            foreach (var follow in followingList)
-            {
-                postList.AddRange(await _postContext.PostsItems
-                .Where(p => p.userId == follow.followingId)
-                .ToListAsync());
-            }
-
-            return postList.OrderByDescending(p => p.Id).ToList();
+            return Ok(post);
         }
 
         private async Task<List<FollowItem>> GetFollowingsAsync(int userId)
@@ -300,5 +300,19 @@ namespace WebApi.Controllers
 
 
         #endregion
+
+        // GET: api/1/following
+        [HttpGet("{id}/following")]
+        public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowings([FromRoute] int id)
+        {
+            return await _followContext.FollowItems.Where(f => f.followerId == id).ToListAsync();
+        }
+
+        // GET: api/1/followers
+        [HttpGet("{id}/followers")]
+        public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowers([FromRoute] int id)
+        {
+            return await _followContext.FollowItems.Where(f => f.followingId == id).ToListAsync();
+        }
     }
 }
