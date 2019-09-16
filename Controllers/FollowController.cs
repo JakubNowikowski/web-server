@@ -20,35 +20,6 @@ namespace WebApi.Controllers
         public FollowController(FollowContext context)
         {
             _context = context;
-            _context.SaveChanges();
-
-            if (_context.FollowItems.Count() == 0)
-            {
-                // Create a new LoginItem if collection is emdkdlslskddjfpty,
-                // which means you can't delete all LoginItems.
-                _context.FollowItems.Add(new FollowItem
-                {
-                    follower = "user1",
-                    following = "user2"
-                });
-                _context.FollowItems.Add(new FollowItem
-                {
-                    follower = "user2",
-                    following = "user1"
-                });
-                _context.FollowItems.Add(new FollowItem
-                {
-                    follower = "user1",
-                    following = "user3"
-                });
-                _context.FollowItems.Add(new FollowItem
-                {
-                    follower = "user1",
-                    following = "user4"
-                });
-                _context.SaveChanges();
-            }
-
         }
 
         // GET: api/Login
@@ -58,21 +29,21 @@ namespace WebApi.Controllers
             return await _context.FollowItems.ToListAsync();
         }
 
-        [HttpGet("followers")]
-        public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowers(string userName)
-        {
-            return await _context.FollowItems
-                .Where(f => f.following == userName)
-                .ToListAsync();
-        }
+        //[HttpGet("followers")]
+        //public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowers(string userName)
+        //{
+        //    return await _context.FollowItems
+        //        .Where(f => f.followingId == userName)
+        //        .ToListAsync();
+        //}
 
-        [HttpGet("followings")]
-        public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowings(string userName)
-        {
-            return await _context.FollowItems
-                .Where(f => f.follower == userName)
-                .ToListAsync();
-        }
+        //[HttpGet("followings")]
+        //public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowings(string userName)
+        //{
+        //    return await _context.FollowItems
+        //        .Where(f => f.followerId == userName)
+        //        .ToListAsync();
+        //}
 
         // POST: api/Login
         [HttpPost]
@@ -93,7 +64,7 @@ namespace WebApi.Controllers
 
         // DELETE api/<controller>/5
         [HttpDelete]
-        public async Task<IActionResult> Unfollow(string follower, string following)
+        public async Task<IActionResult> Unfollow(int followerId, int followingId)
         {
             //var loginItem = await _context.LoginItems.FindAsync(id);
 
@@ -108,7 +79,7 @@ namespace WebApi.Controllers
 
             //var followItem = await _context.FollowItems.FindAsync(follower, following);
 
-            var followItem = await _context.FollowItems.Where(f => f.follower == follower && f.following == following).FirstOrDefaultAsync();
+            var followItem = await _context.FollowItems.Where(f => f.followerId == followerId && f.followingId == followingId).FirstOrDefaultAsync();
 
 
             if (followItem == null)

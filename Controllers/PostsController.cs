@@ -56,28 +56,28 @@ namespace WebApi.Controllers
         }
 
         // GET: api/Posts
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PostItem>>> GetPostsByFollowingUsers(string currentUser)
-        {
-            var postList = new List<PostItem>();
-            var followingList = await GetFollowingsAsync(currentUser);
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<PostItem>>> GetPostsByFollowingUsers(string currentUser)
+        //{
+        //    var postList = new List<PostItem>();
+        //    var followingList = await GetFollowingsAsync(currentUser);
 
-            foreach (var user in followingList)
-            {
-                postList.AddRange(await _postContext.PostsItems
-                //.Where(p => p.userId == user.following)
-                .OrderByDescending(p => p.Id).ToListAsync());
-            }
+        //    foreach (var user in followingList)
+        //    {
+        //        postList.AddRange(await _postContext.PostsItems
+        //        //.Where(p => p.userId == user.following)
+        //        .OrderByDescending(p => p.Id).ToListAsync());
+        //    }
 
-            return postList;
-        }
+        //    return postList;
+        //}
 
-        private async Task<List<FollowItem>> GetFollowingsAsync(string currentUser)
-        {
-            return await _followContext.FollowItems
-                .Where(f => f.follower == currentUser)
-                .ToListAsync();
-        }
+        //private async Task<List<FollowItem>> GetFollowingsAsync(string currentUser)
+        //{
+        //    return await _followContext.FollowItems
+        //        .Where(f => f.followerId == currentUser)
+        //        .ToListAsync();
+        //}
 
         // GET: api/Posts/5
         [HttpGet("{id}")]

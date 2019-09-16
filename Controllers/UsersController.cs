@@ -19,18 +19,21 @@ namespace WebApi.Controllers
     {
         private readonly UserContext _userContext;
         private readonly PostContext _postContext;
+        private readonly FollowContext _followContext;
 
-        public UsersController(UserContext userContext, PostContext postContext)
+        public UsersController(UserContext userContext, PostContext postContext, FollowContext followContext)
         {
             _userContext = userContext;
             _postContext = postContext;
+            _followContext = followContext;
+
+            #region Creating fake users
 
             if (_userContext.Users.Count() == 0)
             {
                 // Create a new UsersItem if collection is emdkdlslskddjfpty,
                 // which means you can't delete all UsersItems.
 
-                #region Creating fake useres
 
                 _userContext.Users.Add(new User
                 {
@@ -61,39 +64,71 @@ namespace WebApi.Controllers
                     password = "aaaaaa"
                 });
 
-                #endregion
-
-                #region Creating random posts
-
-                if (_postContext.PostsItems.Count() == 0)
-                {
-                    _postContext.PostsItems.Add(new PostItem
-                    {
-                        userId = 1,
-                        content = "post: user1"
-                    });
-                    _postContext.PostsItems.Add(new PostItem
-                    {
-                        userId = 2,
-                        content = "post: user2"
-                    });
-                    _postContext.PostsItems.Add(new PostItem
-                    {
-                        userId = 3,
-                        content = "post: user3"
-                    });
-                    _postContext.PostsItems.Add(new PostItem
-                    {
-                        userId = 4,
-                        content = "post: user4"
-                    });
-                    _postContext.SaveChanges();
-                }
-
-                #endregion
-
                 _userContext.SaveChanges();
             }
+
+            #endregion
+
+            #region Creating random posts
+
+            if (_postContext.PostsItems.Count() == 0)
+            {
+                _postContext.PostsItems.Add(new PostItem
+                {
+                    userId = 1,
+                    content = "post: user1"
+                });
+                _postContext.PostsItems.Add(new PostItem
+                {
+                    userId = 2,
+                    content = "post: user2"
+                });
+                _postContext.PostsItems.Add(new PostItem
+                {
+                    userId = 3,
+                    content = "post: user3"
+                });
+                _postContext.PostsItems.Add(new PostItem
+                {
+                    userId = 4,
+                    content = "post: user4"
+                });
+                _postContext.SaveChanges();
+            }
+
+            #endregion
+
+            #region Creating random follows
+
+            if (_followContext.FollowItems.Count() == 0)
+            {
+                // Create a new LoginItem if collection is emdkdlslskddjfpty,
+                // which means you can't delete all LoginItems.
+                _followContext.FollowItems.Add(new FollowItem
+                {
+                    followerId = 1,
+                    followingId = 2
+                });
+                _followContext.FollowItems.Add(new FollowItem
+                {
+                    followerId = 2,
+                    followingId = 1
+                });
+                _followContext.FollowItems.Add(new FollowItem
+                {
+                    followerId = 1,
+                    followingId = 3
+                });
+                _followContext.FollowItems.Add(new FollowItem
+                {
+                    followerId = 1,
+                    followingId = 4
+                });
+
+                _followContext.SaveChanges();
+            }
+
+            #endregion
         }
 
         #region Users
@@ -210,6 +245,32 @@ namespace WebApi.Controllers
             return Ok();
         }
 
+        // GET: api/Posts
+        [HttpGet("{id}/posts")]
+        public async Task<ActionResult<IEnumerable<PostItem>>> GetPosts([FromRoute] int id)
+        {
+            var postList = new List<PostItem>();
+            var followingList = await GetFollowingsAsync(id);
+
+            postList = await _postContext.PostsItems.Where(p => p.userId == id).ToListAsync();
+
+            foreach (var follow in followingList)
+            {
+                postList.AddRange(await _postContext.PostsItems
+                .Where(p => p.userId == follow.followingId)
+                .ToListAsync());
+            }
+
+            return postList.OrderByDescending(p => p.Id).ToList();
+        }
+
+        private async Task<List<FollowItem>> GetFollowingsAsync(int userId)
+        {
+            return await _followContext.FollowItems
+                .Where(f => f.followerId == userId)
+                .ToListAsync();
+        }
+
         // POST: api/Posts
         [HttpPost("{id}/posts")]
         public async Task<IActionResult> PostPostItem([FromRoute] int id, [BindRequired] [FromBody] PostItem post)
@@ -237,54 +298,6 @@ namespace WebApi.Controllers
             //return CreatedAtAction("GetPost", new { id = post.Id }, post);
         }
 
-
-        [HttpGet("{id}/posts")]
-        public async Task<ActionResult<IEnumerable<PostItem>>> GetPosts([FromRoute] int id)
-        {
-            var postList = await _postContext.PostsItems.Where(p => p.userId == id).ToListAsync();
-            return postList;
-        }
-
-        //[HttpGet("{id}/posts")]
-        //public async Task<IActionResult> GetFollowingsPosts([FromRoute] int id)
-        //{
-        //    var postList = new List<PostItem>();
-        //    var followingList = await GetFollowingsAsync(id);
-
-        //    foreach (var user in followingList)
-        //    {
-        //        postList.AddRange(await _postContext.PostsItems
-        //        //.Where(p => p.userId == user.following)
-        //        .OrderByDescending(p => p.Id).ToListAsync());
-        //    }
-
-        //    return postList;
-        //}
-
-        //private async Task<List<FollowItem>> GetFollowingsAsync(int currentUserId)
-        //{
-        //    return await _followContext.FollowItems
-        //        .Where(f => f.follower == currentUserId)
-        //        .ToListAsync();
-        //}
-
-        //[HttpGet("{id}/posts")]
-        //public async Task<IActionResult> GetPosts([FromRoute] int id)
-        //{
-        //    User user;
-        //    try
-        //    {
-        //        user = await GetUserById(id);
-        //    }
-        //    catch (InvalidOperationException)
-        //    {
-        //        return NotFound("Specified user could not be found");
-        //    }
-
-        //    var posts= _postContext;
-
-        //    return Ok(periods);
-        //}
 
         #endregion
     }

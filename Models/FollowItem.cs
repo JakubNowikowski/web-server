@@ -8,7 +8,7 @@ namespace WebApi.Models
     public class FollowItem
     {
         public long Id { get; set; }
-        public string follower { get; set; }
-        public string following { get; set; }
+        public int followerId { get; set; }
+        public int followingId { get; set; }
     }
 }
