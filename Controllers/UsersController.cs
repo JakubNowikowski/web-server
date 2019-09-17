@@ -223,7 +223,7 @@ namespace WebApi.Controllers
         public async Task<ActionResult<IEnumerable<PostItem>>> GetPosts([FromRoute] int id)
         {
             var postList = new List<PostItem>();
-            var followingList = await GetFollowingsAsync(id);
+            var followingList = await GetFollowingsIdAsync(id);
 
             postList = await _postContext.PostsItems.Where(p => p.userId == id).ToListAsync();
 
@@ -263,8 +263,8 @@ namespace WebApi.Controllers
 
             return Ok(post);
         }
-
-        private async Task<List<FollowItem>> GetFollowingsAsync(int userId)
+        
+        private async Task<List<FollowItem>> GetFollowingsIdAsync(int userId)
         {
             return await _followContext.FollowItems
                 .Where(f => f.followerId == userId)
@@ -305,12 +305,20 @@ namespace WebApi.Controllers
 
         // GET: api/1/following
         [HttpGet("{id}/following")]
-        public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowings([FromRoute] int id)
+        public async Task<ActionResult<IEnumerable<User>>> GetFollowings([FromRoute] int id)
         {
-            return await _followContext.FollowItems.Where(f => f.followerId == id).ToListAsync();
+            var followingIds = await GetFollowingsIdAsync(id);
+
+            var usersList = new List<User>();
+
+            foreach (var follow in followingIds)
+            {
+                usersList.Add(await _userContext.Users.SingleAsync(u => u.Id == follow.followingId));
+            }
+
+            return usersList;
         }
 
-        // GET: api/1/followers
         [HttpGet("{id}/followers")]
         public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowers([FromRoute] int id)
         {
