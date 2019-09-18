@@ -271,6 +271,13 @@ namespace WebApi.Controllers
                 .ToListAsync();
         }
 
+        private async Task<List<FollowItem>> GetFollowersIdAsync(int userId)
+        {
+            return await _followContext.FollowItems
+                .Where(f => f.followingId == userId)
+                .ToListAsync();
+        }
+
         // POST: api/Posts
         [HttpPost("{id}/posts")]
         public async Task<IActionResult> PostPostItem([FromRoute] int id, [BindRequired] [FromBody] PostItem post)
@@ -320,9 +327,18 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("{id}/followers")]
-        public async Task<ActionResult<IEnumerable<FollowItem>>> GetFollowers([FromRoute] int id)
+        public async Task<ActionResult<IEnumerable<User>>> GetFollowers([FromRoute] int id)
         {
-            return await _followContext.FollowItems.Where(f => f.followingId == id).ToListAsync();
+            var followersIds = await GetFollowersIdAsync(id);
+
+            var usersList = new List<User>();
+
+            foreach (var follow in followersIds)
+            {
+                usersList.Add(await _userContext.Users.SingleAsync(u => u.Id == follow.followerId));
+            }
+
+            return usersList;
         }
 
         // POST: api/users/1/follwing/5
