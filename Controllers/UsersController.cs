@@ -107,7 +107,7 @@ namespace WebApi.Controllers
                 _followContext.FollowItems.Add(new FollowItem
                 {
                     followerId = 1,
-                    followingId = 2
+                    followingId = 23
                 });
                 _followContext.FollowItems.Add(new FollowItem
                 {
