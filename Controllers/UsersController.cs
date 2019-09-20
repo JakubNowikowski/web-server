@@ -223,7 +223,7 @@ namespace WebApi.Controllers
         public async Task<ActionResult<IEnumerable<PostItem>>> GetPosts([FromRoute] int id)
         {
             var postList = new List<PostItem>();
-            var followingList = await GetFollowingsIdAsync(id);
+            var followingList = await GetFollowingIdAsync(id);
 
             postList = await _postContext.PostsItems.Where(p => p.userId == id).ToListAsync();
 
@@ -264,7 +264,7 @@ namespace WebApi.Controllers
             return Ok(post);
         }
 
-        private async Task<List<FollowItem>> GetFollowingsIdAsync(int userId)
+        private async Task<List<FollowItem>> GetFollowingIdAsync(int userId)
         {
             return await _followContext.FollowItems
                 .Where(f => f.followerId == userId)
@@ -314,7 +314,7 @@ namespace WebApi.Controllers
         [HttpGet("{id}/following")]
         public async Task<ActionResult<IEnumerable<User>>> GetFollowings([FromRoute] int id)
         {
-            var followingIds = await GetFollowingsIdAsync(id);
+            var followingIds = await GetFollowingIdAsync(id);
 
             var usersList = new List<User>();
 
@@ -326,6 +326,7 @@ namespace WebApi.Controllers
             return usersList;
         }
 
+        // GET: api/users/1/followers
         [HttpGet("{id}/followers")]
         public async Task<ActionResult<IEnumerable<User>>> GetFollowers([FromRoute] int id)
         {
@@ -370,6 +371,27 @@ namespace WebApi.Controllers
             await _followContext.SaveChangesAsync();
 
             return Ok();
+        }
+
+        // GET: api/users/1/explore
+        [HttpGet("{id}/explore")]
+        public async Task<ActionResult<IEnumerable<User>>> Explore([FromRoute] int id)
+        {
+            var usersToFollow = new List<User>();
+            var followingIds = await GetFollowingIdAsync(id);
+
+            var usersToFollowIds = await _userContext.Users
+                .Where(u => u.Id != id)
+                .Select(u => u.Id)
+                .Except(followingIds.Select(f => f.followingId))
+                .ToListAsync();
+
+            foreach (var userToFollowId in usersToFollowIds)
+            {
+                usersToFollow.Add(await _userContext.Users.SingleAsync(u => u.Id == userToFollowId));
+            }
+
+            return usersToFollow;
         }
 
         #endregion
