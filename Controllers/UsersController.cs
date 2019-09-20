@@ -263,7 +263,7 @@ namespace WebApi.Controllers
 
             return Ok(post);
         }
-        
+
         private async Task<List<FollowItem>> GetFollowingsIdAsync(int userId)
         {
             return await _followContext.FollowItems
@@ -345,6 +345,9 @@ namespace WebApi.Controllers
         [HttpPost("{id}/following/{followingId}")]
         public async Task<ActionResult<FollowItem>> Follow([FromRoute] int id, [FromRoute] int followingId)
         {
+            if (await _followContext.FollowItems.Where(f => f.followerId == id && f.followingId == followingId).FirstOrDefaultAsync() != null)
+                return BadRequest();
+
             _followContext.FollowItems.Add(new FollowItem() { followerId = id, followingId = followingId });
             await _followContext.SaveChangesAsync();
 
