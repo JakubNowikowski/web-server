@@ -76,21 +76,25 @@ namespace WebApi.Controllers
                 _postContext.PostsItems.Add(new PostItem
                 {
                     userId = 1,
+                    userName ="user1",
                     content = "post: user1"
                 });
                 _postContext.PostsItems.Add(new PostItem
                 {
                     userId = 2,
+                    userName ="user2",
                     content = "post: user2"
                 });
                 _postContext.PostsItems.Add(new PostItem
                 {
                     userId = 3,
+                    userName ="user3",
                     content = "post: user3"
                 });
                 _postContext.PostsItems.Add(new PostItem
                 {
                     userId = 4,
+                    userName = "user4",
                     content = "post: user4"
                 });
                 _postContext.SaveChanges();
@@ -293,13 +297,14 @@ namespace WebApi.Controllers
             }
 
             post.userId = id;
+            post.userName = user.userName;
             _postContext.PostsItems.Add(post);
             await _postContext.SaveChangesAsync();
 
             return Ok
                (new
                {
-                   username = post.userId,
+                   username = post.userName,
                    content = post.content
                });
             //return CreatedAtAction("GetPost", new { id = post.Id }, post);
