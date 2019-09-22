@@ -222,9 +222,9 @@ namespace WebApi.Controllers
 
         #region Posts
 
-        // GET: api/Posts
-        [HttpGet("{id}/posts")]
-        public async Task<ActionResult<IEnumerable<PostItem>>> GetPosts([FromRoute] int id)
+        // GET: api/users/1/followedPosts
+        [HttpGet("{id}/followedPosts")]
+        public async Task<ActionResult<IEnumerable<PostItem>>> GetFollowedPosts([FromRoute] int id)
         {
             var postList = new List<PostItem>();
             var followingList = await GetFollowingIdAsync(id);
@@ -239,6 +239,13 @@ namespace WebApi.Controllers
             }
 
             return postList.OrderByDescending(p => p.Id).ToList();
+        }
+
+        // GET: api/users/1/posts
+        [HttpGet("{id}/posts")]
+        public async Task<ActionResult<IEnumerable<PostItem>>> GetPosts([FromRoute] int id)
+        {
+            return await _postContext.PostsItems.Where(u=>u.userId==id).OrderByDescending(p=>p.Id).ToListAsync();
         }
 
         // GET: api/Posts
