@@ -188,17 +188,17 @@ namespace WebApi.Controllers
 
         // PUT: api/Users/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutLoginItem(long id, User item)
+        public async Task<IActionResult> PutLoginItem(long id, [BindRequired] [FromBody] User user)
         {
-            if (id != item.Id)
+            if (id != user.Id)
             {
                 return BadRequest();
             }
 
-            _userContext.Entry(item).State = EntityState.Modified;
+            _userContext.Entry(user).State = EntityState.Modified;
             await _userContext.SaveChangesAsync();
 
-            return NoContent();
+            return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
 
         // DELETE: api/Users/5
