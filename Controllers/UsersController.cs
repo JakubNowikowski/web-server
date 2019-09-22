@@ -76,25 +76,25 @@ namespace WebApi.Controllers
                 _postContext.PostsItems.Add(new PostItem
                 {
                     userId = 1,
-                    userName ="user1",
+                    userName ="",
                     content = "post: user1"
                 });
                 _postContext.PostsItems.Add(new PostItem
                 {
                     userId = 2,
-                    userName ="user2",
+                    userName ="",
                     content = "post: user2"
                 });
                 _postContext.PostsItems.Add(new PostItem
                 {
                     userId = 3,
-                    userName ="user3",
+                    userName ="",
                     content = "post: user3"
                 });
                 _postContext.PostsItems.Add(new PostItem
                 {
                     userId = 4,
-                    userName = "user4",
+                    userName = "",
                     content = "post: user4"
                 });
                 _postContext.SaveChanges();
@@ -229,16 +229,29 @@ namespace WebApi.Controllers
             var postList = new List<PostItem>();
             var followingList = await GetFollowingIdAsync(id);
 
-            postList = await _postContext.PostsItems.Where(p => p.userId == id).ToListAsync();
+            postList = _postContext.PostsItems.AsEnumerable().Where(p => p.userId == id).Select(p => { p.userName = GetUserName(id); return p; }).ToList();
+            
+            //foreach (var follow in followingList)
+            //{
+            //    postList.AddRange(await _postContext.PostsItems
+            //    .Where(p => p.userId == follow.followingId)
+            //    .ToListAsync());
+            //}
 
             foreach (var follow in followingList)
             {
-                postList.AddRange(await _postContext.PostsItems
+                postList.AddRange(_postContext.PostsItems.AsEnumerable()
                 .Where(p => p.userId == follow.followingId)
-                .ToListAsync());
+                .Select(p => { p.userName = GetUserName(follow.followingId); return p; })
+                .ToList());
             }
 
             return postList.OrderByDescending(p => p.Id).ToList();
+        }
+
+        public string GetUserName(long id)
+        {
+            return _userContext.Users.SingleOrDefault(u => u.Id == id).userName;
         }
 
         // GET: api/users/1/posts
@@ -304,14 +317,12 @@ namespace WebApi.Controllers
             }
 
             post.userId = id;
-            post.userName = user.userName;
             _postContext.PostsItems.Add(post);
             await _postContext.SaveChangesAsync();
 
             return Ok
                (new
                {
-                   username = post.userName,
                    content = post.content
                });
             //return CreatedAtAction("GetPost", new { id = post.Id }, post);
