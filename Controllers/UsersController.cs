@@ -328,6 +328,23 @@ namespace WebApi.Controllers
             //return CreatedAtAction("GetPost", new { id = post.Id }, post);
         }
 
+        // DELETE: api/users/1/posts/5
+        [HttpDelete("{userId}/posts/{postId}")]
+        public async Task<IActionResult> DeletePostItem([FromRoute] int userId, [FromRoute] int postId)
+        {
+            var post = await _postContext.PostsItems.Where(p => p.userId == userId && p.Id==postId).FirstOrDefaultAsync();
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            _postContext.PostsItems.Remove(post);
+
+            await _postContext.SaveChangesAsync();
+
+            return Ok();
+        }
 
         #endregion
 
