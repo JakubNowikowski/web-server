@@ -10,6 +10,7 @@ namespace WebApi.Models
     {
         public long Id { get; set; }
         public int userId { get; set; }
+        public string userName { get; set; }
         public string content { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

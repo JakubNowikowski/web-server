@@ -56,7 +56,8 @@ namespace WebApi.Controllers
                     id = loginItem.Id,
                     username = loginItem.userName,
                     firstName = loginItem.firstName,
-                    lastName = loginItem.lastName
+                    lastName = loginItem.lastName,
+                    password = loginItem.password
                 });
             }
             else
