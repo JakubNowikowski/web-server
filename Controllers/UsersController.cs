@@ -31,10 +31,6 @@ namespace WebApi.Controllers
 
             if (_userContext.Users.Count() == 0)
             {
-                // Create a new UsersItem if collection is emdkdlslskddjfpty,
-                // which means you can't delete all UsersItems.
-
-
                 _userContext.Users.Add(new User
                 {
                     firstName = "user1",
@@ -76,19 +72,19 @@ namespace WebApi.Controllers
                 _postContext.PostsItems.Add(new PostItem
                 {
                     userId = 1,
-                    userName ="",
+                    userName = "",
                     content = "post: user1"
                 });
                 _postContext.PostsItems.Add(new PostItem
                 {
                     userId = 2,
-                    userName ="",
+                    userName = "",
                     content = "post: user2"
                 });
                 _postContext.PostsItems.Add(new PostItem
                 {
                     userId = 3,
-                    userName ="",
+                    userName = "",
                     content = "post: user3"
                 });
                 _postContext.PostsItems.Add(new PostItem
@@ -167,19 +163,11 @@ namespace WebApi.Controllers
               .SingleAsync(u => u.Id == id);
         }
 
-        // POST: api/Users
-        //[HttpPost]
-        //public async Task<ActionResult<UserItem>> PostUser(UserItem item)
-        //{
-        //    _context.Users.Add(item);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction(nameof(GetUser), new { id = item.Id }, item);
-        //}
-
         [HttpPost]
-        public async Task<IActionResult> PostUser([BindRequired] [FromBody] User user)
+        public async Task<IActionResult> RegisterUser([BindRequired] [FromBody] User user)
         {
+            if (await _userContext.Users.Where(u => u.userName == user.userName).FirstOrDefaultAsync() != null)
+                return BadRequest("This username already exists");
             _userContext.Users.Add(user);
             await _userContext.SaveChangesAsync();
 
@@ -230,7 +218,7 @@ namespace WebApi.Controllers
             var followingList = await GetFollowingIdAsync(id);
 
             postList = _postContext.PostsItems.AsEnumerable().Where(p => p.userId == id).Select(p => { p.userName = GetUserName(id); return p; }).ToList();
-            
+
             //foreach (var follow in followingList)
             //{
             //    postList.AddRange(await _postContext.PostsItems
@@ -258,7 +246,7 @@ namespace WebApi.Controllers
         [HttpGet("{id}/posts")]
         public async Task<ActionResult<IEnumerable<PostItem>>> GetPosts([FromRoute] int id)
         {
-            return await _postContext.PostsItems.Where(u=>u.userId==id).OrderByDescending(p=>p.Id).ToListAsync();
+            return await _postContext.PostsItems.Where(u => u.userId == id).OrderByDescending(p => p.Id).ToListAsync();
         }
 
         // GET: api/Posts
@@ -325,14 +313,13 @@ namespace WebApi.Controllers
                {
                    content = post.content
                });
-            //return CreatedAtAction("GetPost", new { id = post.Id }, post);
         }
 
         // DELETE: api/users/1/posts/5
         [HttpDelete("{userId}/posts/{postId}")]
         public async Task<IActionResult> DeletePostItem([FromRoute] int userId, [FromRoute] int postId)
         {
-            var post = await _postContext.PostsItems.Where(p => p.userId == userId && p.Id==postId).FirstOrDefaultAsync();
+            var post = await _postContext.PostsItems.Where(p => p.userId == userId && p.Id == postId).FirstOrDefaultAsync();
 
             if (post == null)
             {
