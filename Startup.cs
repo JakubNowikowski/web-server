@@ -43,8 +43,6 @@ namespace WebApi
             });
             services.AddDbContext<UserContext>(opt =>
                 opt.UseInMemoryDatabase("LoginList"));
-            services.AddDbContext<ToDoContext>(opt =>
-                opt.UseInMemoryDatabase("TodoList"));
             services.AddDbContext<PostContext>(opt =>
                 opt.UseInMemoryDatabase("PostsList"));
             services.AddDbContext<FollowContext>(opt =>
