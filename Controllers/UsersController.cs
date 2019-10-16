@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApi.Models;
 using WebApi.Contexts;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using WebApi.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -133,7 +134,7 @@ namespace WebApi.Controllers
 
         #region Users
 
-        // GET: api/Users
+        //// GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
@@ -156,7 +157,7 @@ namespace WebApi.Controllers
 
         }
 
-        private async Task<User> GetUserById(int id)
+        public async Task<User> GetUserById(int id)
         {
             return await _userContext
               .Users
@@ -168,10 +169,16 @@ namespace WebApi.Controllers
         {
             if (await _userContext.Users.Where(u => u.userName == user.userName).FirstOrDefaultAsync() != null)
                 return BadRequest("This username already exists");
-            _userContext.Users.Add(user);
-            await _userContext.SaveChangesAsync();
+         
+            await AddUser(user);
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
+        }
+
+        public async Task AddUser(User newUser)
+        {
+            _userContext.Users.Add(newUser);
+            await _userContext.SaveChangesAsync();
         }
 
         // PUT: api/Users/5
@@ -182,6 +189,8 @@ namespace WebApi.Controllers
             {
                 return BadRequest();
             }
+
+            //_itemSource.EditItem(_userContext, user);
 
             _userContext.Entry(user).State = EntityState.Modified;
             await _userContext.SaveChangesAsync();
