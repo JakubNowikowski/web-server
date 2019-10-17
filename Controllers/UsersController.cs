@@ -8,9 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using WebApi.Models;
 using WebApi.Contexts;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using WebApi.Services;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace WebApi.Controllers
 {
@@ -161,41 +158,48 @@ namespace WebApi.Controllers
         {
             return await _userContext
               .Users
-              .SingleAsync(u => u.Id == id);
+              .SingleOrDefaultAsync(u => u.Id == id);
         }
 
         [HttpPost]
         public async Task<IActionResult> RegisterUser([BindRequired] [FromBody] User user)
         {
+            if (user == null)
+                return BadRequest();
             if (await _userContext.Users.Where(u => u.userName == user.userName).FirstOrDefaultAsync() != null)
                 return BadRequest("This username already exists");
-         
-            await AddUser(user);
+
+            user = await AddUser(user);
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
 
-        public async Task AddUser(User newUser)
+        public async Task<User> AddUser(User newUser)
         {
             _userContext.Users.Add(newUser);
             await _userContext.SaveChangesAsync();
+            return newUser;
         }
 
         // PUT: api/Users/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLoginItem(long id, [BindRequired] [FromBody] User user)
         {
-            if (id != user.Id)
-            {
+            if (user == null)
                 return BadRequest();
-            }
+            if (id != user.Id)
+                return BadRequest();
 
-            //_itemSource.EditItem(_userContext, user);
-
-            _userContext.Entry(user).State = EntityState.Modified;
-            await _userContext.SaveChangesAsync();
+            user = await EditUser(user);
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
+        }
+
+        public async Task<User> EditUser(User user)
+        {
+            _userContext.Entry(user).State = EntityState.Modified;
+            await _userContext.SaveChangesAsync();
+            return user;
         }
 
         // DELETE: api/Users/5
@@ -205,14 +209,17 @@ namespace WebApi.Controllers
             var loginItem = await _userContext.Users.FindAsync(id);
 
             if (loginItem == null)
-            {
                 return NotFound();
-            }
 
-            _userContext.Users.Remove(loginItem);
-            await _userContext.SaveChangesAsync();
+            await DeleteUser(loginItem);
 
             return NoContent();
+        }
+
+        public async Task DeleteUser(User loginItem)
+        {
+            _userContext.Users.Remove(loginItem);
+            await _userContext.SaveChangesAsync();
         }
 
         #endregion
@@ -223,32 +230,57 @@ namespace WebApi.Controllers
         [HttpGet("{id}/followedPosts")]
         public async Task<ActionResult<IEnumerable<PostItem>>> GetFollowedPosts([FromRoute] int id)
         {
-            var postList = new List<PostItem>();
-            var followingList = await GetFollowingIdAsync(id);
+            List<PostItem> userPosts;
+            List<PostItem> followingPosts;
 
-            postList = _postContext.PostsItems.AsEnumerable().Where(p => p.userId == id).Select(p => { p.userName = GetUserName(id); return p; }).ToList();
+            var followingList = await GetFollowingById(id);
 
-            //foreach (var follow in followingList)
-            //{
-            //    postList.AddRange(await _postContext.PostsItems
-            //    .Where(p => p.userId == follow.followingId)
-            //    .ToListAsync());
-            //}
+            userPosts = GetPostsById(id);
+            followingPosts = GetFollowingsPosts(followingList);
 
-            foreach (var follow in followingList)
-            {
-                postList.AddRange(_postContext.PostsItems.AsEnumerable()
-                .Where(p => p.userId == follow.followingId)
-                .Select(p => { p.userName = GetUserName(follow.followingId); return p; })
-                .ToList());
-            }
+            userPosts.AddRange(followingPosts);
 
-            return postList.OrderByDescending(p => p.Id).ToList();
+            return userPosts.OrderByDescending(p => p.Id).ToList();
+        }
+
+        public async Task<List<FollowItem>> GetFollowingById(int userId)
+        {
+            return await _followContext.FollowItems
+                .Where(f => f.followerId == userId)
+                .ToListAsync();
+        }
+
+        public List<PostItem> GetPostsById(int id)
+        {
+            return _postContext.PostsItems.AsEnumerable()
+                            .Where(p => p.userId == id)
+                            .Select(AddUserNameToPostItem(id))
+                            .ToList();
+        }
+
+        private Func<PostItem, PostItem> AddUserNameToPostItem(long id)
+        {
+            return p => { p.userName = GetUserName(id); return p; };
         }
 
         public string GetUserName(long id)
         {
             return _userContext.Users.SingleOrDefault(u => u.Id == id).userName;
+        }
+
+        public List<PostItem> GetFollowingsPosts(List<FollowItem> followingList)
+        {
+            var postList = new List<PostItem>();
+
+            foreach (var follow in followingList)
+            {
+                postList.AddRange(_postContext.PostsItems.AsEnumerable()
+                .Where(p => p.userId == follow.followingId)
+                .Select(AddUserNameToPostItem(follow.followingId))
+                .ToList());
+            }
+
+            return postList;
         }
 
         // GET: api/users/1/posts
@@ -285,13 +317,6 @@ namespace WebApi.Controllers
             return Ok(post);
         }
 
-        private async Task<List<FollowItem>> GetFollowingIdAsync(int userId)
-        {
-            return await _followContext.FollowItems
-                .Where(f => f.followerId == userId)
-                .ToListAsync();
-        }
-
         private async Task<List<FollowItem>> GetFollowersIdAsync(int userId)
         {
             return await _followContext.FollowItems
@@ -314,14 +339,19 @@ namespace WebApi.Controllers
             }
 
             post.userId = id;
-            _postContext.PostsItems.Add(post);
-            await _postContext.SaveChangesAsync();
+            await AddPost(post);
 
             return Ok
                (new
                {
                    content = post.content
                });
+        }
+
+        public async Task AddPost(PostItem post)
+        {
+            _postContext.PostsItems.Add(post);
+            await _postContext.SaveChangesAsync();
         }
 
         // DELETE: api/users/1/posts/5
@@ -331,9 +361,7 @@ namespace WebApi.Controllers
             var post = await _postContext.PostsItems.Where(p => p.userId == userId && p.Id == postId).FirstOrDefaultAsync();
 
             if (post == null)
-            {
                 return NotFound();
-            }
 
             _postContext.PostsItems.Remove(post);
 
@@ -350,14 +378,12 @@ namespace WebApi.Controllers
         [HttpGet("{id}/following")]
         public async Task<ActionResult<IEnumerable<User>>> GetFollowings([FromRoute] int id)
         {
-            var followingIds = await GetFollowingIdAsync(id);
+            var followingIds = await GetFollowingById(id);
 
             var usersList = new List<User>();
 
             foreach (var follow in followingIds)
-            {
                 usersList.Add(await _userContext.Users.SingleAsync(u => u.Id == follow.followingId));
-            }
 
             return usersList;
         }
@@ -371,9 +397,7 @@ namespace WebApi.Controllers
             var usersList = new List<User>();
 
             foreach (var follow in followersIds)
-            {
                 usersList.Add(await _userContext.Users.SingleAsync(u => u.Id == follow.followerId));
-            }
 
             return usersList;
         }
@@ -385,10 +409,15 @@ namespace WebApi.Controllers
             if (await _followContext.FollowItems.Where(f => f.followerId == id && f.followingId == followingId).FirstOrDefaultAsync() != null)
                 return BadRequest();
 
-            _followContext.FollowItems.Add(new FollowItem() { followerId = id, followingId = followingId });
-            await _followContext.SaveChangesAsync();
+            await AddFollowItem(id, followingId);
 
             return Ok();
+        }
+
+        private async Task AddFollowItem(int id, int followingId)
+        {
+            _followContext.FollowItems.Add(new FollowItem() { followerId = id, followingId = followingId });
+            await _followContext.SaveChangesAsync();
         }
 
         // DELETE: api/users/1/follwing/5
@@ -398,15 +427,17 @@ namespace WebApi.Controllers
             var followItem = await _followContext.FollowItems.Where(f => f.followerId == id && f.followingId == followingId).FirstOrDefaultAsync();
 
             if (followItem == null)
-            {
                 return NotFound();
-            }
 
-            _followContext.FollowItems.Remove(followItem);
-
-            await _followContext.SaveChangesAsync();
+            await DeleteFollowItem(followItem);
 
             return Ok();
+        }
+
+        private async Task DeleteFollowItem(FollowItem followItem)
+        {
+            _followContext.FollowItems.Remove(followItem);
+            await _followContext.SaveChangesAsync();
         }
 
         // GET: api/users/1/explore
@@ -414,20 +445,23 @@ namespace WebApi.Controllers
         public async Task<ActionResult<IEnumerable<User>>> Explore([FromRoute] int id)
         {
             var usersToFollow = new List<User>();
-            var followingIds = await GetFollowingIdAsync(id);
+            var followingIds = await GetFollowingById(id);
 
-            var usersToFollowIds = await _userContext.Users
-                .Where(u => u.Id != id)
-                .Select(u => u.Id)
-                .Except(followingIds.Select(f => f.followingId))
-                .ToListAsync();
+            List<long> usersToFollowIds = await ExtractFollowingsIdsByUserId(id, followingIds);
 
             foreach (var userToFollowId in usersToFollowIds)
-            {
                 usersToFollow.Add(await _userContext.Users.SingleAsync(u => u.Id == userToFollowId));
-            }
 
             return usersToFollow;
+        }
+
+        public async Task<List<long>> ExtractFollowingsIdsByUserId(int id, List<FollowItem> followings)
+        {
+            return await _userContext.Users
+                            .Where(u => u.Id != id)
+                            .Select(u => u.Id)
+                            .Except(followings.Select(f => f.followingId))
+                            .ToListAsync();
         }
 
         #endregion
