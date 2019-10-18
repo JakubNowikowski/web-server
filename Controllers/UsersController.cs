@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Models;
@@ -447,7 +446,7 @@ namespace WebApi.Controllers
             var usersToFollow = new List<User>();
             var followingIds = await GetFollowingById(id);
 
-            List<long> usersToFollowIds = await ExtractFollowingsIdsByUserId(id, followingIds);
+            List<long> usersToFollowIds = await ExtractUnfollowedIdsByUserId(id, followingIds);
 
             foreach (var userToFollowId in usersToFollowIds)
                 usersToFollow.Add(await _userContext.Users.SingleAsync(u => u.Id == userToFollowId));
@@ -455,7 +454,7 @@ namespace WebApi.Controllers
             return usersToFollow;
         }
 
-        public async Task<List<long>> ExtractFollowingsIdsByUserId(int id, List<FollowItem> followings)
+        public async Task<List<long>> ExtractUnfollowedIdsByUserId(int id, List<FollowItem> followings)
         {
             return await _userContext.Users
                             .Where(u => u.Id != id)
